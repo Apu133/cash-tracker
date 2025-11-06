@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         NODE_VERSION = '24.2.0'
-        GIT_URI = 'https://github.com/Apu133/cash-tracker.git'
         FRONTEND_DIR = 'frontend'
         BACKEND_DIR = 'backend'
     }
@@ -12,7 +11,7 @@ pipeline {
             steps {
                 echo 'Checking out code...'
                 git branch: 'main',
-                url: '$GIT_URI'
+                url: 'https://github.com/Apu133/cash-tracker.git'
             }
         }
 
@@ -124,4 +123,5 @@ pipeline {
             bat 'echo "Build Failed."'
         }
     }
+
 }
