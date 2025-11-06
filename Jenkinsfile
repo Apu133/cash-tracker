@@ -82,7 +82,7 @@ pipeline {
                         dir ("${BACKEND_DIR}") {
                             bat '''
                                 echo "Building the application"
-                                npm run build
+                                npm start
                             '''
                         }
                     }
@@ -101,6 +101,7 @@ pipeline {
     }
 
 }
+
 
 
 
