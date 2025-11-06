@@ -12,7 +12,7 @@ pipeline {
             steps {
                 echo 'Checking out code...'
                 git branch: 'main',
-                url: '$GIT_URI'
+                url: "$GIT_URI"
             }
         }
 
@@ -126,3 +126,4 @@ pipeline {
     }
 
 }
+
