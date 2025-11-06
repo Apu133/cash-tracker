@@ -35,7 +35,7 @@ pipeline {
                         expression { fileExists("${BACKEND_DIR}/package.json") }
                     }
                     steps {
-                        dir ('${BACKEND_DIR}') {
+                        dir ("${BACKEND_DIR}") {
                             sh """
                                 echo 'Installing Backend Dependencies...'
                                 npm install
@@ -48,7 +48,7 @@ pipeline {
                         expression { fileExists("${FRONTEND_DIR}/package.json") }
                     }
                     steps {
-                        dir ('${FRONTEND_DIR}') {
+                        dir ("${FRONTEND_DIR}") {
                             sh """
                                 echo 'Installing Frontend Dependencies...'
                                 npm install
@@ -66,7 +66,7 @@ pipeline {
                         expression { fileExists('${FRONTEND_DIR}/package.json') }
                     }
                     steps {
-                        dir ('${FRONTEND_DIR}') {
+                        dir ("${FRONTEND_DIR}") {
                             sh """
                                 echo 'Running test on frontend side'
                                 npm test
@@ -79,7 +79,7 @@ pipeline {
                         expression { fileExists('${BACKEND_DIR}/package.json') }
                     }
                     steps {
-                        dir ('${BACKEND_DIR}') {
+                        dir ("${BACKEND_DIR}") {
                             sh """
                                 echo 'Running test on backend side'
                                 npm test
@@ -94,7 +94,7 @@ pipeline {
             parallel {
                 stage ("Building Frontend") {
                     steps {
-                        dir ('${FRONTEND_DIR}') {
+                        dir ("${FRONTEND_DIR}") {
                             sh """
                                 echo 'Building the Frontend application'
                                 npm run build
@@ -104,7 +104,7 @@ pipeline {
                 }
                 stage ("Building Backend") {
                     steps {
-                        dir ('${BACKEND_DIR}') {
+                        dir ("${BACKEND_DIR}") {
                             sh """
                                 echo 'Building the application'
                                 npm run build
@@ -126,4 +126,5 @@ pipeline {
     }
 
 }
+
 
