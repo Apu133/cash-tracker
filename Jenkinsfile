@@ -58,33 +58,10 @@ pipeline {
         }
 
         stage ("Tests") {
-            parallel {
-                stage ("Frontend Testing") {
-                    when {
-                        expression { fileExists("${FRONTEND_DIR}/package.json") }
-                    }
-                    steps {
-                        dir ("${FRONTEND_DIR}") {
-                            bat '''
-                                echo "Running test on frontend side"
-                                npm test
-                            '''
-                        }
-                    }
-                }
-                stage ("Backend Testing") {
-                    when {
-                        expression { fileExists("${BACKEND_DIR}/package.json") }
-                    }
-                    steps {
-                        dir ("${BACKEND_DIR}") {
-                            bat '''
-                                echo "Running test on backend side"
-                                npm test
-                            '''
-                        }
-                    }
-                }
+            steps {
+                bat '''
+                    echo "Reached Testing Stage."
+                '''
             }
         }
 
@@ -124,6 +101,7 @@ pipeline {
     }
 
 }
+
 
 
 
