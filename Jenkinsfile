@@ -12,7 +12,7 @@ pipeline {
             steps {
                 echo 'Checking out code...'
                 git branch: 'main',
-                git url: '$GIT_URI'
+                url: '$GIT_URI'
             }
         }
 
@@ -124,4 +124,5 @@ pipeline {
             sh "echo 'Build Failed.'"
         }
     }
+
 }
