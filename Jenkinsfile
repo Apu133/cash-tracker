@@ -12,13 +12,13 @@ pipeline {
             steps {
                 echo 'Checking out code...'
                 git branch: 'main',
-                url: "$GIT_URI"
+                url: '$GIT_URI'
             }
         }
 
         stage ('Setting up Node') {
             steps {
-                sh '''
+                bat '''
                     . ~/.nvm/nvm.sh
                     nvm install ${NODE_VERSION}
                     nvm use ${NODE_VERSION}
@@ -35,11 +35,11 @@ pipeline {
                         expression { fileExists("${BACKEND_DIR}/package.json") }
                     }
                     steps {
-                        dir ("${BACKEND_DIR}") {
-                            sh """
-                                echo 'Installing Backend Dependencies...'
+                        dir ('${BACKEND_DIR}') {
+                            bat '''
+                                echo "Installing Backend Dependencies..."
                                 npm install
-                            """
+                            '''
                         }
                     }
                 }
@@ -48,11 +48,11 @@ pipeline {
                         expression { fileExists("${FRONTEND_DIR}/package.json") }
                     }
                     steps {
-                        dir ("${FRONTEND_DIR}") {
-                            sh """
-                                echo 'Installing Frontend Dependencies...'
+                        dir ('${FRONTEND_DIR}') {
+                            bat '''
+                                echo "Installing Frontend Dependencies..."
                                 npm install
-                            """
+                            '''
                         }
                     }    
                 }
@@ -66,11 +66,11 @@ pipeline {
                         expression { fileExists('${FRONTEND_DIR}/package.json') }
                     }
                     steps {
-                        dir ("${FRONTEND_DIR}") {
-                            sh """
-                                echo 'Running test on frontend side'
+                        dir ('${FRONTEND_DIR}') {
+                            bat '''
+                                echo "Running test on frontend side"
                                 npm test
-                            """
+                            '''
                         }
                     }
                 }
@@ -79,11 +79,11 @@ pipeline {
                         expression { fileExists('${BACKEND_DIR}/package.json') }
                     }
                     steps {
-                        dir ("${BACKEND_DIR}") {
-                            sh """
-                                echo 'Running test on backend side'
+                        dir ('${BACKEND_DIR}') {
+                            bat '''
+                                echo "Running test on backend side"
                                 npm test
-                            """
+                            '''
                         }
                     }
                 }
@@ -94,21 +94,21 @@ pipeline {
             parallel {
                 stage ("Building Frontend") {
                     steps {
-                        dir ("${FRONTEND_DIR}") {
-                            sh """
-                                echo 'Building the Frontend application'
+                        dir ('${FRONTEND_DIR}') {
+                            bat '''
+                                echo "Building the Frontend application"
                                 npm run build
-                            """
+                            '''
                         }
                     }
                 }
                 stage ("Building Backend") {
                     steps {
-                        dir ("${BACKEND_DIR}") {
-                            sh """
-                                echo 'Building the application'
+                        dir ('${BACKEND_DIR}') {
+                            bat '''
+                                echo "Building the application"
                                 npm run build
-                            """
+                            '''
                         }
                     }
                 }
@@ -118,13 +118,10 @@ pipeline {
     }
     post {
         success {
-            sh "echo 'Build Successful.'"
+            bat 'echo "Build Successful."'
         }
         failure {
-            sh "echo 'Build Failed.'"
+            bat 'echo "Build Failed."'
         }
     }
-
 }
-
-
