@@ -77,16 +77,16 @@ pipeline {
                         }
                     }
                 }
-                stage ("Building Backend") {
-                    steps {
-                        dir ("${BACKEND_DIR}") {
-                            bat '''
-                                echo "Building the application"
-                                npm start
-                            '''
-                        }
-                    }
-                }
+                // stage ("Building Backend") {
+                    // steps {
+                        // dir ("${BACKEND_DIR}") {
+                            // bat '''
+                                // echo "Building the application"
+                                // npm start
+                            // '''
+                        // }
+                    // }
+                // }
             }
             
         }
@@ -101,6 +101,7 @@ pipeline {
     }
 
 }
+
 
 
 
