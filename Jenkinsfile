@@ -6,7 +6,7 @@ pipeline {
     }
     
     environment {
-        // NODE_VERSION = '24.2.0'
+        // NODE_VERSION = '25.1.0'
         FRONTEND_DIR = 'frontend'
         BACKEND_DIR = 'backend'
     }
@@ -124,6 +124,7 @@ pipeline {
     }
 
 }
+
 
 
 
