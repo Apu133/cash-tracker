@@ -1,29 +1,22 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'Node_18'
+    }
+    
     environment {
-        NODE_VERSION = '24.2.0'
+        // NODE_VERSION = '24.2.0'
         FRONTEND_DIR = 'frontend'
         BACKEND_DIR = 'backend'
     }
+
     stages {
         stage ("Checkout code") {
             steps {
                 echo 'Checking out code...'
                 git branch: 'main',
                 url: 'https://github.com/Apu133/cash-tracker.git'
-            }
-        }
-
-        stage ('Setting up Node') {
-            steps {
-                bat '''
-                    . ~/.nvm/nvm.sh
-                    nvm install ${NODE_VERSION}
-                    nvm use ${NODE_VERSION}
-                    node -v
-                    npm -v
-                '''
             }
         }
 
@@ -127,4 +120,5 @@ pipeline {
     }
 
 }
+
 
