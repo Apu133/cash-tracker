@@ -2,13 +2,17 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'Node_18'
+        nodejs 'Node_24.2.0'
     }
     
     environment {
         // NODE_VERSION = '24.2.0'
         FRONTEND_DIR = 'frontend'
         BACKEND_DIR = 'backend'
+    }
+
+    options {
+        timeout (time: 15, unit: 'MINUTES')
     }
 
     stages {
@@ -120,5 +124,6 @@ pipeline {
     }
 
 }
+
 
 
