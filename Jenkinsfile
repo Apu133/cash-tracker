@@ -34,7 +34,7 @@ pipeline {
                         dir ("${BACKEND_DIR}") {
                             bat '''
                                 echo "Installing Backend Dependencies..."
-                                npm ci --no-audit --no-fund --prefer-offline --progress=false
+                                npm install --no-audit --no-fund --prefer-offline --progress=false
                                 echo "Backend Dependencies Installated Successfully."
                             '''
                         }
@@ -48,7 +48,7 @@ pipeline {
                         dir ("${FRONTEND_DIR}") {
                             bat '''
                                 echo "Installing Frontend Dependencies..."
-                                npm ci --no-audit --no-fund --prefer-offline --progress=false
+                                npm install --no-audit --no-fund --prefer-offline --progress=false
                                 echo "Frontend Dependencies Installed Successfully."
                             '''
                         }
@@ -124,6 +124,7 @@ pipeline {
     }
 
 }
+
 
 
 
