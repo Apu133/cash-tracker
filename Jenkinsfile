@@ -6,13 +6,13 @@ pipeline {
     }
     
     environment {
-        // NODE_VERSION = '25.1.0'
         FRONTEND_DIR = 'frontend'
         BACKEND_DIR = 'backend'
+        npm_config_cache = "${WORKSPACE}\\npm-cache"
     }
 
     options {
-        timeout (time: 15, unit: 'MINUTES')
+        timeout (time: 10, unit: 'MINUTES')
     }
 
     stages {
@@ -31,10 +31,10 @@ pipeline {
                         expression { fileExists("${BACKEND_DIR}/package.json") }
                     }
                     steps {
-                        dir ('${BACKEND_DIR}') {
+                        dir ("${BACKEND_DIR}") {
                             bat '''
                                 echo "Installing Backend Dependencies..."
-                                npm ci
+                                npm ci --no-audit --no-fund --prefer-offline --progress=false
                                 echo "Backend Dependencies Installated Successfully."
                             '''
                         }
@@ -45,10 +45,10 @@ pipeline {
                         expression { fileExists("${FRONTEND_DIR}/package.json") }
                     }
                     steps {
-                        dir ('${FRONTEND_DIR}') {
+                        dir ("${FRONTEND_DIR}") {
                             bat '''
                                 echo "Installing Frontend Dependencies..."
-                                npm ci
+                                npm ci --no-audit --no-fund --prefer-offline --progress=false
                                 echo "Frontend Dependencies Installed Successfully."
                             '''
                         }
@@ -61,10 +61,10 @@ pipeline {
             parallel {
                 stage ("Frontend Testing") {
                     when {
-                        expression { fileExists('${FRONTEND_DIR}/package.json') }
+                        expression { fileExists("${FRONTEND_DIR}/package.json") }
                     }
                     steps {
-                        dir ('${FRONTEND_DIR}') {
+                        dir ("${FRONTEND_DIR}") {
                             bat '''
                                 echo "Running test on frontend side"
                                 npm test
@@ -74,10 +74,10 @@ pipeline {
                 }
                 stage ("Backend Testing") {
                     when {
-                        expression { fileExists('${BACKEND_DIR}/package.json') }
+                        expression { fileExists("${BACKEND_DIR}/package.json") }
                     }
                     steps {
-                        dir ('${BACKEND_DIR}') {
+                        dir ("${BACKEND_DIR}") {
                             bat '''
                                 echo "Running test on backend side"
                                 npm test
@@ -92,7 +92,7 @@ pipeline {
             parallel {
                 stage ("Building Frontend") {
                     steps {
-                        dir ('${FRONTEND_DIR}') {
+                        dir ("${FRONTEND_DIR}") {
                             bat '''
                                 echo "Building the Frontend application"
                                 npm run build
@@ -102,7 +102,7 @@ pipeline {
                 }
                 stage ("Building Backend") {
                     steps {
-                        dir ('${BACKEND_DIR}') {
+                        dir ("${BACKEND_DIR}") {
                             bat '''
                                 echo "Building the application"
                                 npm run build
@@ -124,6 +124,7 @@ pipeline {
     }
 
 }
+
 
 
 
