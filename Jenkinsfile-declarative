@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+    options {
+        timeout (time: "${TIME}", unit: "${UNIT}")
+    }
+    tools {
+        nodejs 'Node'
+    }
+    environment {
+        FRONTEND_DIR = 'frontend',
+        BACKEND_DIR = 'backend'
+    }
+    stages {
+        stage ('Checkout Code') {
+            steps {
+                script {
+                    echo 'Checking out code...'
+                    git branch: "${BRANCH}", url: "${URL}"
+                }
+            }
+        }
+        stage ('Installing Dependencies') {
+            parallel {
+                stage ('Installing Frontend Dependencies') {
+                    when {
+                        expression {
+                            fileExists ("${FRONTEND_DIR}/package.json")
+                        }
+                    }
+                    steps {
+                        dir ("${FRONTEND_DIR}") {
+                            script {
+                                echo 'About to install frontend dependencies...'
+                                bat 'npm install'
+                            }
+                        }
+                    }
+                }
+                stage ('Installing Backend Dependencies') {
+                    when {
+                        expression {
+                            fileExists ("${BACKEND_DIR}/package.json")
+                        }
+                    }
+                    steps {
+                        dir ("${BACKEND_DIR}") {
+                            script {
+                                echo 'About to install backend dependencies...'
+                                bat 'npm install'
+                            }
+                        }
+                    }                    
+                }
+            }
+        }
+    }
+    post {
+        always {
+            bat 'echo "Pipeline build complete."'
+        }
+        success {
+            bat 'echo "Mission Successful."'
+        }
+        failure {
+            bat 'echo "Mission failed."'
+        }
+    }
+}
