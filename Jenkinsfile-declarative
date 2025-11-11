@@ -22,31 +22,32 @@ pipeline {
         stage('Installing Dependencies') {
             parallel {
                 stage('Installing Frontend Dependencies') {
-                    when {
-                        expression {
-                            fileExists(env.FRONTEND_DIR/'package.json')
-                        }
-                    }
                     steps {
                         dir(env.FRONTEND_DIR) {
                             script {
-                                echo 'About to install frontend dependencies...'
-                                bat 'npm install'
+                                if(fileExists('package.json')) {
+                                    bat 'npm install'
+                                    echo 'Installing Frontend Dependencies...'
+                                }
+                                else {
+                                    echo 'Could not find package.json file in Frontend directory.'
+                                }
                             }
                         }
                     }
                 }
                 stage('Installing Backend Dependencies') {
-                    when {
-                        expression {
-                            fileExists(env.BACKEND_DIR/'package.json')
-                        }
-                    }
                     steps {
                         dir(env.BACKEND_DIR) {
                             script {
-                                echo 'About to install backend dependencies...'
-                                bat 'npm install'
+                                if(fileExists('package.json')) {
+                                    bat 'npm install'
+                                    echo 'Installing Backend Dependencies...'
+                                }
+                                else {
+
+                                    echo 'Could not find package.json file in Backend directory.'
+                                }
                             }
                         }
                     }                    
@@ -67,6 +68,7 @@ pipeline {
     }
 
 }
+
 
 
 
