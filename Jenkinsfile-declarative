@@ -1,7 +1,7 @@
 pipeline {
     agent any
     options {
-        timeout (time: 5, unit: "MINUTES")
+        timeout(time: 5, unit: "MINUTES")
     }
     tools {
         nodejs 'Node'
@@ -11,7 +11,7 @@ pipeline {
         BACKEND_DIR = 'backend'
     }
     stages {
-        stage ('Checkout Code') {
+        stage('Checkout Code') {
             steps {
                 script {
                     echo 'Checking out code...'
@@ -19,16 +19,16 @@ pipeline {
                 }
             }
         }
-        stage ('Installing Dependencies') {
+        stage('Installing Dependencies') {
             parallel {
-                stage ('Installing Frontend Dependencies') {
+                stage('Installing Frontend Dependencies') {
                     when {
                         expression {
-                            fileExists ("${FRONTEND_DIR}/package.json")
+                            fileExists(env.FRONTEND_DIR/'package.json')
                         }
                     }
                     steps {
-                        dir ("${FRONTEND_DIR}") {
+                        dir(env.FRONTEND_DIR}) {
                             script {
                                 echo 'About to install frontend dependencies...'
                                 bat 'npm install'
@@ -36,14 +36,14 @@ pipeline {
                         }
                     }
                 }
-                stage ('Installing Backend Dependencies') {
+                stage('Installing Backend Dependencies') {
                     when {
                         expression {
-                            fileExists ("${BACKEND_DIR}/package.json")
+                            fileExists(env.BACKEND_DIR/'package.json')
                         }
                     }
                     steps {
-                        dir ("${BACKEND_DIR}") {
+                        dir(env.BACKEND_DIR) {
                             script {
                                 echo 'About to install backend dependencies...'
                                 bat 'npm install'
@@ -56,15 +56,16 @@ pipeline {
     }
     post {
         always {
-            bat 'echo "Pipeline build complete."'
+            echo 'Pipeline build complete.'
         }
         success {
-            bat 'echo "Mission Successful."'
+            echo 'Mission Successful.'
         }
         failure {
-            bat 'echo "Mission failed."'
+            echo 'Mission failed.'
         }
     }
 
 }
+
 
