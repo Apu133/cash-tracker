@@ -1,7 +1,7 @@
 pipeline {
     agent any
     options {
-        timeout(time: 5, unit: "MINUTES")
+        timeout(time: "${params.TIME}", unit: "${params.UNIT}")
     }
     tools {
         nodejs 'Node'
@@ -15,7 +15,7 @@ pipeline {
             steps {
                 script {
                     echo 'Checking out code...'
-                    git branch: 'main', url: 'https://github.com/Apu133/cash-tracker.git'
+                    git branch: "${params.BRANCH}", url: 'https://github.com/Apu133/cash-tracker.git'
                 }
             }
         }
@@ -68,6 +68,7 @@ pipeline {
     }
 
 }
+
 
 
 
