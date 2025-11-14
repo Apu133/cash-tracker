@@ -1,3 +1,4 @@
+// This pipeline is used with parameters
 pipeline {
     agent any
     options {
@@ -68,6 +69,7 @@ pipeline {
     }
 
 }
+
 
 
 
