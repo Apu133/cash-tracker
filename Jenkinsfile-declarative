@@ -15,7 +15,7 @@ pipeline {
             steps {
                 script {
                     echo 'Checking out code...'
-                    git branch: "${params.BRANCH}", url: 'https://github.com/Apu133/cash-tracker.git'
+                    git branch: "${params.BRANCH}", url: "${params.URL}"
                 }
             }
         }
@@ -68,6 +68,7 @@ pipeline {
     }
 
 }
+
 
 
 
