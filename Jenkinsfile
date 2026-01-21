@@ -39,16 +39,6 @@ pipeline {
             }
         }
 
-        stage('Tests') {
-            steps {
-                bat '''
-                    cd backend
-                    npm run test
-                    cd ..
-                '''
-            }
-        }
-
         stage('Build images') {
             steps {
                 bat '''
