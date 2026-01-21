@@ -1,14 +1,8 @@
 pipeline {
-    agent any
+    agent { label 'windows' }
 
     tools {
-        nodejs 'Node_25.1.0'
-    }
-    
-    environment {
-        FRONTEND_DIR = 'frontend'
-        BACKEND_DIR = 'backend'
-        npm_config_cache = "${WORKSPACE}\\npm-cache"
+        nodejs 'Node_25.3.0'
     }
 
     options {
@@ -16,79 +10,59 @@ pipeline {
     }
 
     stages {
-        stage ("Checkout code") {
+        stage("Checkout code") {
             steps {
-                echo 'Checking out code...'
-                git branch: 'main',
+                echo "Checking out code..."
+                git branch: 'features',
                 url: 'https://github.com/Apu133/cash-tracker.git'
             }
         }
 
-        stage ("Installing Dependencies") {
-            parallel {
-                stage ("Backend Dependencies") {
-                    when {
-                        expression { fileExists("${BACKEND_DIR}/package.json") }
-                    }
-                    steps {
-                        dir ("${BACKEND_DIR}") {
-                            bat '''
-                                echo "Installing Backend Dependencies..."
-                                npm install --no-audit --no-fund --prefer-offline --progress=false
-                                echo "Backend Dependencies Installated Successfully."
-                            '''
-                        }
-                    }
-                }
-                stage ("Frontend Dependencies") {
-                    when {
-                        expression { fileExists("${FRONTEND_DIR}/package.json") }
-                    }
-                    steps {
-                        dir ("${FRONTEND_DIR}") {
-                            bat '''
-                                echo "Installing Frontend Dependencies..."
-                                npm install --no-audit --no-fund --prefer-offline --progress=false
-                                echo "Frontend Dependencies Installed Successfully."
-                            '''
-                        }
-                    }    
-                }
-            }
-        }
-
-        stage ("Tests") {
+        stage('Installing frontend dependencies') {
             steps {
                 bat '''
-                    echo "Reached Testing Stage."
+                    cd frontend
+                    npm install
+                    echo "Dependencies / packages installed successfully."
+                    cd ..
+                '''
+            }
+        }
+        stage('Installing backend dependencies') {
+            steps {
+                bat '''
+                    cd backend
+                    npm install
+                    echo "Dependencies / packages installed successfully."
+                    cd ..
                 '''
             }
         }
 
-        stage ("Build") {
-            parallel {
-                stage ("Building Frontend") {
-                    steps {
-                        dir ("${FRONTEND_DIR}") {
-                            bat '''
-                                echo "Building the Frontend application"
-                                npm run build
-                            '''
-                        }
-                    }
-                }
-                // stage ("Building Backend") {
-                    // steps {
-                        // dir ("${BACKEND_DIR}") {
-                            // bat '''
-                                // echo "Building the application"
-                                // npm start
-                            // '''
-                        // }
-                    // }
-                // }
+        stage('Tests') {
+            steps {
+                bat '''
+                    cd backend
+                    npm run test
+                    cd ..
+                '''
             }
-            
+        }
+
+        stage('Build images') {
+            steps {
+                bat '''
+                    docker compose build
+                    echo "Docker images build successfully."
+                '''
+            }            
+        }
+        stage('Pushing docker images to dockerhub') {
+            steps {
+                bat '''
+                    docker push apu133/cash-tracker-backend:0.1 apu133/cash-tracker-frontend:0.1
+                '''
+            }
         }
     }
     post {

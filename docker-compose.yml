@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:latest
@@ -13,6 +11,7 @@ services:
 
   backend:
     build: ./backend
+    image: apu133/cash-tracker-backend:0.1
     container_name: cash-tracker-backend
     ports:
       - "5000:5000"
@@ -27,6 +26,7 @@ services:
 
   frontend:
     build: ./frontend
+    image: apu133/cash-tracker-frontend:0.1
     container_name: cash-tracker-frontend
     ports:
       - "3000:80"
