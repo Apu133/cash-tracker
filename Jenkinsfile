@@ -2,7 +2,7 @@ pipeline {
     agent { label 'windows' }
 
     tools {
-        node 'NodeJS 25.3.0'
+        nodejs 'NodeJS 25.3.0'
     }
 
     options {
