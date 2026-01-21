@@ -60,7 +60,9 @@ pipeline {
         stage('Pushing docker images to dockerhub') {
             steps {
                 bat '''
-                    docker push apu133/cash-tracker-backend:0.1 apu133/cash-tracker-frontend:0.1
+                    docker push apu133/cash-tracker-backend:0.1 
+                    docker push apu133/cash-tracker-frontend:0.1
+                    echo "Pushed images to dockerhub."
                 '''
             }
         }
@@ -75,14 +77,3 @@ pipeline {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
