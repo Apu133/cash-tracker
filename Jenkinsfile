@@ -49,11 +49,17 @@ pipeline {
         }
         stage('Pushing docker images to dockerhub') {
             steps {
-                bat '''
-                    docker push apu133/cash-tracker-backend:0.1 
-                    docker push apu133/cash-tracker-frontend:0.1
-                    echo "Pushed images to dockerhub."
-                '''
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    bat '''
+                        docker push apu133/cash-tracker-backend:0.1 
+                        docker push apu133/cash-tracker-frontend:0.1
+                        echo "Pushed images to dockerhub."
+                    '''
+                }
             }
         }
     }
