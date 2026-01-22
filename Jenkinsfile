@@ -59,6 +59,8 @@ pipeline {
                         docker push apu133/cash-tracker-backend:0.1 
                         docker push apu133/cash-tracker-frontend:0.1
                         echo "Pushed images to dockerhub."
+                        docker logout
+                        echo "Logging out of the dockerhub..."
                     '''
                 }
             }
