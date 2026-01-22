@@ -55,6 +55,7 @@ pipeline {
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
                     bat '''
+                        docker login -u %DOCKER_USER% -p %DOCKER_PASS%
                         docker push apu133/cash-tracker-backend:0.1 
                         docker push apu133/cash-tracker-frontend:0.1
                         echo "Pushed images to dockerhub."
