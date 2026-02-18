@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db_deployment
+spec:
+  serviceName: db_service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db_app
+  template:
+    metadata:
+      name: db
+      labels:
+        app: db_app
+    spec:
+      containers:
+        - name: mongo
+          image: mongo
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo_data
+              mountPath: /data/db/
+          env:
+            - name: MONGO_INITDB_DATABASE
+              value: cash-tracker
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo_data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
