@@ -1,0 +1,129 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db-deployment
+spec:
+  serviceName: db-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-app
+  template:
+    metadata:
+      name: db
+      labels:
+        app: db-app
+    spec:
+      containers:
+        - name: mongo
+          image: mongo
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db/
+          env:
+            - name: MONGO_INITDB_DATABASE
+              value: cash-tracker
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service
+spec:
+  clusterIP: None
+  selector:
+    app: db-app
+  ports:
+  - targetPort: 27017
+    port: 27017
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: backend-app
+  template:
+    metadata:
+      name: backend
+      labels:
+        app: backend-app
+    spec:
+      containers:
+        - name: backend
+          image: apu133/cash-tracker-backend:0.1
+          ports:
+            - containerPort: 5000
+          env:
+            - name: MONGODB_URI
+              value: mongodb://db-service:27017/cash-tracker
+            - name: PORT
+              value: "5000"
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: backend-app
+  ports:
+    - targetPort: 5000
+      port: 5000
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: frontend-app
+  template:
+    metadata:
+      name: frontend
+      labels:
+        app: frontend-app
+    spec:
+      containers:
+        - name: frontend
+          image: apu133/cash-tracker-frontend:0.3
+          ports:
+            - containerPort: 80
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  type: NodePort
+  selector:
+    app: frontend-app
+  ports:
+  - targetPort: 80
+    port: 80
+    nodePort: 30001
