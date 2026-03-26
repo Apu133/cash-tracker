@@ -64,13 +64,6 @@ pipeline {
                 }
             }
         }
-        stage('Starting kubernetes deployments and services via helm') {
-            steps {
-                sh '''
-                    helm install cash-track-release ./cash-tracker-chart
-                '''
-            }
-        }
     }
     post {
         success {
