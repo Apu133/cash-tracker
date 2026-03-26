@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.db.name }}-service
+spec:
+  clusterIP: None
+  selector:
+    app: {{ .Values.service.db.name }}-app
+  ports:
+  - targetPort: {{ .Values.service.db.port }}
+    port: {{ .Values.service.db.port }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.backend.name }}-service
+spec:
+  type: {{ .Values.service.backend.type }}
+  selector:
+    app: {{ .Values.service.backend.name }}-app
+  ports:
+    - targetPort: {{ .Values.service.backend.port }}
+      port: {{ .Values.service.backend.port }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.frontend.name }}-service
+spec:
+  type: {{ .Values.service.frontend.type }}
+  selector:
+    app: {{ .Values.service.frontend.name }}-app
+  ports:
+  - targetPort: {{ .Values.service.frontend.ports.port }}
+    port: {{ .Values.service.frontend.ports.port }}
+    nodePort: {{ .Values.service.frontend.ports.nodePort }}

@@ -1,0 +1,46 @@
+deployment:
+  replicaCount: 4
+  backend:
+    name: backend
+    image:
+      repository: apu133/cash-tracker-backend
+      tag: 0.1
+    port: 5000
+    env:
+      mongo_uri: mongodb://db-service:27017/cash-tracker
+      port: "5000"
+  
+  frontend:
+    name: frontend
+    image:
+      repository: apu133/cash-tracker-frontend
+      tag: 0.3
+    port: 80
+  
+  db:
+    name: db
+    image:
+      repository: mongo
+    port: 27017
+    env:
+      mongo_init_db: cash-tracker
+    mount:
+      name: mongo-data
+      mountPath: /data/db/
+
+service:
+  db:
+    name: db
+    port: 27017
+
+  backend:
+    name: backend
+    type: ClusterIP
+    port: 5000
+  
+  frontend:
+    name: frontend
+    type: NodePort
+    ports:
+      port: 80
+      nodePort: 30001
