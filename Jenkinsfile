@@ -13,14 +13,13 @@ pipeline {
         stage("Checkout code") {
             steps {
                 echo "Checking out code..."
-                git branch: 'features',
-                url: 'https://github.com/Apu133/cash-tracker.git'
+                git branch: 'features', url: 'https://github.com/Apu133/cash-tracker.git'
             }
         }
 
         stage('Installing frontend dependencies') {
             steps {
-                bat '''
+                sh '''
                     cd frontend
                     npm install
                     echo "Dependencies / packages installed successfully."
@@ -30,7 +29,7 @@ pipeline {
         }
         stage('Installing backend dependencies') {
             steps {
-                bat '''
+                sh '''
                     cd backend
                     npm install
                     echo "Dependencies / packages installed successfully."
@@ -41,7 +40,7 @@ pipeline {
 
         stage('Build images') {
             steps {
-                bat '''
+                sh '''
                     docker compose build
                     echo "Docker images build successfully."
                 '''
@@ -54,10 +53,10 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    bat '''
-                        docker login -u %DOCKER_USER% -p %DOCKER_PASS%
-                        docker push apu133/cash-tracker-backend:0.2 
-                        docker push apu133/cash-tracker-frontend:0.2
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push apu133/cash-tracker-backend:0.1 
+                        docker push apu133/cash-tracker-frontend:0.3
                         echo "Pushed images to dockerhub."
                         docker logout
                         echo "Logging out of the dockerhub..."
@@ -65,13 +64,20 @@ pipeline {
                 }
             }
         }
+        stage('Starting kubernetes deployments and services via helm') {
+            steps {
+                sh '''
+                    helm install cash-track-release ./cash-tracker-chart
+                '''
+            }
+        }
     }
     post {
         success {
-            bat 'echo "Build Successful."'
+            sh 'echo "Application is live on port 30001."'
         }
         failure {
-            bat 'echo "Build Failed."'
+            sh 'echo "Build Failed."'
         }
     }
 
