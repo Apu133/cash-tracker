@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.deployment.db.name }}-deployment
+spec:
+  serviceName: {{ .Values.deployment.db.name }}-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.deployment.db.name }}-app
+  template:
+    metadata:
+      name: {{ .Values.deployment.db.name }}
+      labels:
+        app: {{ .Values.deployment.db.name }}-app
+    spec:
+      containers:
+        - name: mongo
+          image: {{ .Values.deployment.db.image.repository }}:latest
+          ports:
+            - containerPort: {{ .Values.deployment.db.port }}
+          volumeMounts:
+            - name: {{ .Values.deployment.db.mount.name }}
+              mountPath: {{ .Values.deployment.db.mount.mountPath }}
+          env:
+            - name: MONGO_INITDB_DATABASE
+              value: {{ .Values.deployment.db.env.mongo_init_db | quote }}
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deployment.backend.name }}-deployment
+spec:
+  replicas: {{ .Values.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deployment.backend.name }}-app
+  template:
+    metadata:
+      name: backend
+      labels:
+        app: {{ .Values.deployment.backend.name }}-app
+    spec:
+      containers:
+        - name: {{ .Values.deployment.backend.name }}
+          image: {{ .Values.deployment.backend.image.repository }}:{{ .Values.deployment.backend.image.tag }}
+          ports:
+            - containerPort: {{ .Values.deployment.backend.port }}
+          env:
+            - name: MONGODB_URI
+              value: {{ .Values.deployment.backend.env.mongo_uri | quote }}
+            - name: PORT
+              value: {{ .Values.deployment.backend.env.port | quote }}
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deployment.frontend.name }}-deployment
+spec:
+  replicas: {{ .Values.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deployment.frontend.name }}-app
+  template:
+    metadata:
+      name: {{ .Values.deployment.frontend.name }}
+      labels:
+        app: {{ .Values.deployment.frontend.name }}-app
+    spec:
+      containers:
+        - name: frontend
+          image: {{ .Values.deployment.frontend.image.repository }}:{{ .Values.deployment.frontend.image.tag }}
+          ports:
+            - containerPort: {{ .Values.deployment.frontend.port }}

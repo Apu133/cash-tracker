@@ -2,13 +2,7 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'Node_25.1.0'
-    }
-    
-    environment {
-        FRONTEND_DIR = 'frontend'
-        BACKEND_DIR = 'backend'
-        npm_config_cache = "${WORKSPACE}\\npm-cache"
+        nodejs 'nodejs'
     }
 
     options {
@@ -16,99 +10,68 @@ pipeline {
     }
 
     stages {
-        stage ("Checkout code") {
+        stage("Checkout code") {
             steps {
-                echo 'Checking out code...'
-                git branch: 'main',
-                url: 'https://github.com/Apu133/cash-tracker.git'
+                echo "Checking out code..."
+                git branch: 'features', url: 'https://github.com/Apu133/cash-tracker.git'
             }
         }
 
-        stage ("Installing Dependencies") {
-            parallel {
-                stage ("Backend Dependencies") {
-                    when {
-                        expression { fileExists("${BACKEND_DIR}/package.json") }
-                    }
-                    steps {
-                        dir ("${BACKEND_DIR}") {
-                            bat '''
-                                echo "Installing Backend Dependencies..."
-                                npm install --no-audit --no-fund --prefer-offline --progress=false
-                                echo "Backend Dependencies Installated Successfully."
-                            '''
-                        }
-                    }
-                }
-                stage ("Frontend Dependencies") {
-                    when {
-                        expression { fileExists("${FRONTEND_DIR}/package.json") }
-                    }
-                    steps {
-                        dir ("${FRONTEND_DIR}") {
-                            bat '''
-                                echo "Installing Frontend Dependencies..."
-                                npm install --no-audit --no-fund --prefer-offline --progress=false
-                                echo "Frontend Dependencies Installed Successfully."
-                            '''
-                        }
-                    }    
-                }
+        stage('Installing frontend dependencies') {
+            steps {
+                sh '''
+                    cd frontend
+                    npm install
+                    echo "Dependencies / packages installed successfully."
+                    cd ..
+                '''
             }
         }
-
-        stage ("Tests") {
+        stage('Installing backend dependencies') {
             steps {
-                bat '''
-                    echo "Reached Testing Stage."
+                sh '''
+                    cd backend
+                    npm install
+                    echo "Dependencies / packages installed successfully."
+                    cd ..
                 '''
             }
         }
 
-        stage ("Build") {
-            parallel {
-                stage ("Building Frontend") {
-                    steps {
-                        dir ("${FRONTEND_DIR}") {
-                            bat '''
-                                echo "Building the Frontend application"
-                                npm run build
-                            '''
-                        }
-                    }
+        stage('Build images') {
+            steps {
+                sh '''
+                    docker compose build
+                    echo "Docker images build successfully."
+                '''
+            }            
+        }
+        stage('Pushing docker images to dockerhub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push apu133/cash-tracker-backend:0.1 
+                        docker push apu133/cash-tracker-frontend:0.3
+                        echo "Pushed images to dockerhub."
+                        docker logout
+                        echo "Logging out of the dockerhub..."
+                    '''
                 }
-                // stage ("Building Backend") {
-                    // steps {
-                        // dir ("${BACKEND_DIR}") {
-                            // bat '''
-                                // echo "Building the application"
-                                // npm start
-                            // '''
-                        // }
-                    // }
-                // }
             }
-            
         }
     }
     post {
         success {
-            bat 'echo "Build Successful."'
+            sh 'echo "Application is live on port 30001."'
         }
         failure {
-            bat 'echo "Build Failed."'
+            sh 'echo "Build Failed."'
         }
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
