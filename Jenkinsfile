@@ -41,7 +41,7 @@ pipeline {
         stage('Build images') {
             steps {
                 sh '''
-                    docker-compose build
+                    docker compose build
                     echo "Docker images build successfully."
                 '''
             }            
