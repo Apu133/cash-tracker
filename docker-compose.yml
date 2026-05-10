@@ -21,13 +21,24 @@ services:
 
   frontend:
     build: ./frontend
-    image: apu133/cash-tracker-frontend:0.3
+    image: apu133/cash-tracker-frontend:0.4
     ports:
       - "3000:80"
-    environment:
-      - REACT_APP_API_URL=http://backend:5000
     depends_on:
       - backend
 
+  mongo-backup:
+    image: mongo:latest
+    depends_on:
+      - mongodb
+    volumes:
+      - mongodb_backups:/backups
+    entrypoint: >
+      sh -c 'while true; do
+        mongodump --host mongodb --out /backups/$(date +%F_%T);
+        sleep 86400;
+      done'
+
 volumes:
   mongodb_data:
+  mongodb_backups:
