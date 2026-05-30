@@ -13,7 +13,7 @@ pipeline {
         stage("Checkout code") {
             steps {
                 echo "Checking out code..."
-                git branch: 'features', url: 'https://github.com/Apu133/cash-tracker.git'
+                git branch: 'trial', url: 'https://github.com/Apu133/cash-tracker.git'
             }
         }
 
@@ -46,28 +46,18 @@ pipeline {
                 '''
             }            
         }
-        stage('Pushing docker images to dockerhub') {
+        stage('Docker compose running') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push apu133/cash-tracker-backend:0.1 
-                        docker push apu133/cash-tracker-frontend:0.3
-                        echo "Pushed images to dockerhub."
-                        docker logout
-                        echo "Logging out of the dockerhub..."
-                    '''
-                }
+                sh '''
+                    docker compose up -d
+                    echo "Docker compose is running."
+                '''
             }
         }
     }
     post {
         success {
-            sh 'echo "Application is live on port 30001."'
+            sh 'echo "Application is live on port 3000."'
         }
         failure {
             sh 'echo "Build Failed."'
