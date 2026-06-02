@@ -53,14 +53,14 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    sh """
+                        echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
                         docker push ${params.DOCKER_FRONT_IMAGE}:${params.IMAGE_TAG_FRONT}
                         docker push ${params.DOCKER_BACK_IMAGE}:${params.IMAGE_TAG_BACK}
                         echo "Pushed docker image to dockerhub"
                         docker logout
                         echo "Logging out of Dockerhub"
-                    '''
+                    """
                 }
             }
         }
