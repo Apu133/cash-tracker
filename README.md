@@ -6,16 +6,17 @@ A personal **microservice-based Cash Tracking application** built to manage and 
 
 ## 📌 Table of Contents
 
-- [About the Project](#about-the-project)
-- [Tech Stack](#tech-stack)
-- [Architecture Overview](#architecture-overview)
-- [AWS Infrastructure](#aws-infrastructure)
-- [CI/CD Pipeline](#cicd-pipeline)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Deploy on AWS — Step by Step](#deploy-on-aws--step-by-step)
-- [Docker & DockerHub](#docker--dockerhub)
-- [Future Improvements](#future-improvements)
+- [About the Project](#-about-the-project)
+- [Tech Stack](#️-tech-stack)
+- [Architecture Overview](#️-architecture-overview)
+- [AWS Infrastructure](#️-aws-infrastructure)
+- [CI/CD Pipeline](#-cicd-pipeline)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [Deploy on AWS — Step by Step](#️-deploy-on-aws--step-by-step)
+- [Docker & DockerHub](#-docker--dockerhub)
+- [Kubernetes (Local - Minikube)](#️-kubernetes-local---minikube)
+- [Future Improvements](#-future-improvements)
 
 ---
 
@@ -386,8 +387,8 @@ docker compose push
 ### Pull & Run from DockerHub
 
 ```bash
-docker pull yourdockerhubusername/cash-tracker-frontend:latest
-docker pull yourdockerhubusername/cash-tracker-backend:latest
+docker pull apu133/cash-tracker-frontend:latest
+docker pull apu133/cash-tracker-backend:latest
 docker compose up
 ```
 
@@ -470,9 +471,6 @@ This will stop and remove all pods and resources created by the Helm chart.
 - [ ] Migrate from Docker Compose to full **Kubernetes on EKS**
 - [ ] Add **HTTPS / SSL** using Let's Encrypt or AWS ACM
 - [ ] Set up **log management** with ELK Stack or Loki
-- [ ] Add **automated testing stage** in Jenkins pipeline
-- [ ] Implement **blue-green deployment** strategy
-- [ ] Get **AWS Solutions Architect Associate** certification
 
 ---
 
