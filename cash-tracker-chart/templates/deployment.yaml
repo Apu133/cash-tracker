@@ -3,7 +3,7 @@ kind: StatefulSet
 metadata:
   name: {{ .Values.deployment.db.name }}-deployment
 spec:
-  serviceName: {{ .Values.deployment.db.name }}-service
+  serviceName: {{ .Values.deployment.db.name }}
   replicas: 1
   selector:
     matchLabels:
