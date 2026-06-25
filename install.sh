@@ -48,4 +48,36 @@ sudo usermod -aG docker ubuntu
 sudo usermod -aG docker jenkins
 sudo systemctl restart jenkins
 
+# Node exporter
+wget https://github.com/prometheus/node_exporter/releases/download/v1.11.1/node_exporter-1.11.1.linux-amd64.tar.gz
+tar -xvf node_exporter-1.11.1.linux-amd64.tar.gz
+sudo mv ./node_exporter-1.11.1.linux-amd64/node_exporter /usr/local/bin/
+
+sudo groupadd --system node_exporter
+sudo useradd -rs /bin/false --system -g node_exporter node_exporter
+
+sudo mkdir /etc/node_exporter
+
+sudo chown -R node_exporter:node_exporter /etc/node_exporter
+
+sudo tee /etc/systemd/system/node_exporter.system << 'EOF'
+[Unit]
+Description=Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=node_exporter
+Group=node_exporter
+ExecStart=/usr/local/bin/node_exporter
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable node_exporter
+sudo systemctl start node_exporter
+
+
 echo "Installations complete."
