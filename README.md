@@ -15,6 +15,7 @@ A personal **microservice-based Cash Tracking application** built to manage and 
 - [Getting Started](#-getting-started)
 - [Deploy on AWS — Step by Step](#️-deploy-on-aws--step-by-step)
 - [Docker & DockerHub](#-docker--dockerhub)
+- [Monitoring — Prometheus, Node Exporter & Grafana](#-monitoring--prometheus-node-exporter--grafana)
 - [Kubernetes (Local - Minikube)](#️-kubernetes-local---minikube)
 - [Future Improvements](#-future-improvements)
 
@@ -51,6 +52,10 @@ The project was built not just as a functional app, but as a **complete DevOps s
 | **Key Pairs** | Secure SSH access to EC2 |
 | **Kubernetes (Minikube)** | Local container orchestration |
 | **Helm** | Kubernetes package management |
+| **Prometheus** | Metrics collection and monitoring |
+| **Node Exporter** | System-level metrics exposure |
+| **Grafana** | Metrics visualization and dashboards |
+| **OpenSSL** | TLS certificate generation |
 | **Shell Script** | Environment automation |
 | **Git & GitHub** | Version control |
 | **Ubuntu 24.04 LTS** | EC2 operating system |
@@ -80,6 +85,23 @@ Developer (Local)
                     ▼
           Live App on AWS EC2
           (Ubuntu 24.04 LTS | t3.small | 30GB)
+                    │
+                    │  Node Exporter (port 9100)
+                    │  exposes system metrics
+                    │
+                    ▼
+ ┌─────────────────────────────────────────┐
+ │         Local Machine                   │
+ │                                         │
+ │  Prometheus ◄── scrapes EC2 + Local     │
+ │      │                                  │
+ │      │  feeds metrics                   │
+ │      ▼                                  │
+ │  Grafana                                │
+ │  (Custom Dashboards via PromQL)         │
+ │  CPU % | Memory % | Disk % |            │
+ │  Uptime | Network In/Out                │
+ └─────────────────────────────────────────┘
 ```
 
 ---
@@ -197,7 +219,9 @@ cash-tracker/
 ├── docker-compose.yml              # Multi-service container orchestration
 ├── Jenkinsfile                     # Jenkins CI/CD pipeline definition
 ├── main.tf                         # Terraform — AWS infrastructure (EC2, VPC, SG, EIP, Key Pair)
-└── install.sh                      # EC2 bootstrap script (installs Docker & Jenkins)
+├── install.sh                      # EC2 bootstrap script (installs Docker & Jenkins)
+├── LICENSE                         # MIT License
+└── README.md                       # Project documentation
 ```
 
 ---
@@ -394,7 +418,372 @@ docker compose up
 
 ---
 
-## ☸️ Kubernetes (Local - Minikube)
+## 📊 Monitoring — Prometheus, Node Exporter & Grafana
+
+> The monitoring stack runs on the **local machine** (not on EC2) due to EC2's 2GB RAM constraint. Node Exporter runs on EC2 and exposes metrics, which Prometheus scrapes remotely. This mirrors real-world production monitoring architecture where the monitoring stack is always separate from the workloads it observes.
+
+---
+
+### 🏗️ Monitoring Architecture
+
+```
+Local Machine                          AWS EC2 Instance
+┌──────────────────────────┐           ┌─────────────────────────┐
+│  Prometheus               │           │  Node Exporter           │
+│  (scrapes targets)   ─────┼──────────►│  (exposes metrics)       │
+│                           │           │  Port: 9100              │
+│  Grafana                  │           │  (no TLS / no auth)      │
+│  (visualizes metrics) ◄───┤           └─────────────────────────┘
+│                           │
+│  Node Exporter            │           Local Machine (self)
+│  (local metrics)    ◄─────┤           ┌─────────────────────────┐
+└──────────────────────────┘           │  Node Exporter           │
+                                        │  (exposes metrics)       │
+                                        │  Port: 9100              │
+                                        │  TLS + Basic Auth        │
+                                        └─────────────────────────┘
+```
+
+---
+
+### 🔒 Security
+
+The **local machine Node Exporter** endpoint is secured with:
+
+- **TLS encryption** — self-signed certificates generated using OpenSSL
+- **Basic Authentication** — password hashing using `apache2-utils` (htpasswd)
+
+> ℹ️ The **EC2 Node Exporter** does not use TLS or basic auth.
+
+---
+
+### ⚙️ Components
+
+| Component | Where it Runs | Purpose |
+|---|---|---|
+| **Prometheus** | Local Machine | Scrapes and stores time-series metrics from all targets |
+| **Node Exporter** | EC2 Instance | Exposes EC2 system metrics (CPU, memory, disk, network) |
+| **Node Exporter** | Local Machine | Exposes local system metrics |
+| **Grafana** | Local Machine | Visualizes metrics from Prometheus via dashboards |
+
+---
+
+### 🖥️ Node Exporter on EC2 (Automated)
+
+Node Exporter installation and configuration on EC2 is fully automated via a shell script. It handles:
+
+- Downloading and installing Node Exporter
+- Configuring and starting Node Exporter as a systemd service
+
+---
+
+### 🎯 Prometheus Scrape Targets
+
+Prometheus scrapes metrics from multiple sources:
+
+| Target | Address | Security |
+|---|---|---|
+| Local Machine | `localhost:9100` | TLS + Basic Auth |
+| EC2 Instance | `<elastic_ip>:9100` | No auth |
+
+---
+
+### 📈 Grafana Dashboards
+
+Grafana is connected to Prometheus as a datasource and includes:
+
+**Pre-built Dashboard (Imported)**
+- Node Exporter Full dashboard (Grafana Dashboard ID: 1860)
+
+**Custom Dashboard (Built with PromQL)**
+
+| Panel | PromQL Metric |
+|---|---|
+| CPU Usage % | `100 - (avg by(instance)(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)` |
+| Memory Usage % | `100 - ((node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100)` |
+| Storage Usage % | `100 - ((node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100)` |
+| System Uptime | `node_time_seconds - node_boot_time_seconds` |
+| Network In | `rate(node_network_receive_bytes_total[5m])` |
+| Network Out | `rate(node_network_transmit_bytes_total[5m])` |
+
+---
+
+### 🚀 Setup Prometheus (Local Machine)
+
+**Step 1 — Install Prometheus**
+
+```bash
+wget https://github.com/prometheus/prometheus/releases/download/v3.5.3/prometheus-3.5.3.linux-amd64.tar.gz
+tar xvf prometheus-3.5.3.linux-amd64.tar.gz
+cd prometheus-3.5.3.linux-amd64/
+sudo mv prometheus /usr/local/bin/
+sudo mv promtool /usr/local/bin/
+sudo mkdir /etc/prometheus
+sudo mv prometheus.yml /etc/prometheus/
+```
+
+---
+
+**Step 2 — Give Permissions**
+
+Create a dedicated system user and group for Prometheus, then assign ownership:
+
+```bash
+sudo groupadd --system prometheus
+sudo useradd -s /sbin/nologin --system -g prometheus prometheus
+sudo chown -R prometheus:prometheus /etc/prometheus
+sudo chown prometheus:prometheus /usr/local/bin/prometheus
+sudo chown prometheus:prometheus /usr/local/bin/promtool
+```
+
+---
+
+**Step 3 — Configure prometheus.yml**
+
+Edit the config file:
+
+```bash
+sudo vi /etc/prometheus/prometheus.yml
+```
+
+Add your scrape targets — local machine uses TLS and basic auth, EC2 uses plain HTTP:
+
+```yaml
+scrape_configs:
+  - job_name: 'node-local'
+    scheme: https
+    tls_config:
+      ca_file: /etc/prometheus/certs/ca.crt
+      insecure_skip_verify: true
+    basic_auth:
+      username: your_username
+      password: your_password
+    static_configs:
+      - targets: ['localhost:9100']
+
+  - job_name: 'node-ec2'
+    scheme: http
+    static_configs:
+      - targets: ['<elastic_ip>:9100']
+```
+
+---
+
+**Step 4 — Add as a systemd Service**
+
+Create the service file:
+
+```bash
+sudo touch /etc/systemd/system/prometheus.service
+sudo vi /etc/systemd/system/prometheus.service
+```
+
+Paste the following content:
+
+```ini
+[Unit]
+Description=Prometheus
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=prometheus
+Group=prometheus
+Type=simple
+ExecStart=/usr/local/bin/prometheus \
+  --config.file=/etc/prometheus/prometheus.yml \
+  --storage.tsdb.path=/var/lib/prometheus
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Create the data directory and set ownership:
+
+```bash
+sudo mkdir -p /var/lib/prometheus
+sudo chown -R prometheus:prometheus /var/lib/prometheus
+```
+
+Enable and start the service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable prometheus
+sudo systemctl start prometheus
+sudo systemctl status prometheus
+```
+
+Prometheus will be available at `http://localhost:9090`
+
+---
+
+### 🔧 Setup Node Exporter (Local Machine)
+
+**Step 1 — Install Node Exporter**
+
+```bash
+wget https://github.com/prometheus/node_exporter/releases/latest/download/node_exporter-*.linux-amd64.tar.gz
+tar xvf node_exporter-*.linux-amd64.tar.gz
+cd node_exporter-*/
+sudo mv node_exporter /usr/local/bin/
+```
+
+---
+
+**Step 2 — Give Permissions**
+
+Create a dedicated system user and assign ownership:
+
+```bash
+sudo groupadd --system node_exporter
+sudo useradd -rs /bin/false --system -g node_exporter node_exporter
+sudo chown node_exporter:node_exporter /usr/local/bin/node_exporter
+```
+
+---
+
+**Step 3 — Setup TLS and Basic Auth (OpenSSL + apache2-utils)**
+
+Install required tools:
+
+```bash
+sudo apt-get install -y openssl apache2-utils
+```
+
+Create a directory to store certificates:
+
+```bash
+sudo mkdir /etc/node_exporter
+sudo chown node_exporter:node_exporter /etc/node_exporter
+```
+
+Generate a self-signed TLS certificate using OpenSSL:
+
+```bash
+sudo openssl req -new -newkey rsa:2048 -days 365 -nodes -x509 \
+  -keyout /etc/node_exporter/node_exporter.key \
+  -out /etc/node_exporter/node_exporter.crt \
+  -subj "/CN=localhost"
+```
+
+Generate a hashed password using apache2-utils:
+
+```bash
+htpasswd -nBC 12 "" | tr -d ':\n'
+```
+
+Copy the output hash — you will use it in the web config file below.
+
+Create the web config file for Node Exporter:
+
+```bash
+sudo vi /etc/node_exporter/web-config.yml
+```
+
+Paste the following content:
+
+```yaml
+tls_server_config:
+  cert_file: /etc/node_exporter/node_exporter.crt
+  key_file: /etc/node_exporter/node_exporter.key
+
+basic_auth_users:
+  your_username: <paste_hashed_password_here>
+```
+
+Set ownership on the config directory:
+
+```bash
+sudo chown -R node_exporter:node_exporter /etc/node_exporter
+```
+
+---
+
+**Step 4 — Add as a systemd Service**
+
+Create the service file:
+
+```bash
+sudo touch /etc/systemd/system/node_exporter.service
+sudo vi /etc/systemd/system/node_exporter.service
+```
+
+Paste the following content:
+
+```ini
+[Unit]
+Description=Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=node_exporter
+Group=node_exporter
+Type=simple
+ExecStart=/usr/local/bin/node_exporter \
+  --web.config.file=/etc/node_exporter/web-config.yml
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start the service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable node_exporter
+sudo systemctl start node_exporter
+sudo systemctl status node_exporter
+```
+
+Node Exporter will be available at `https://localhost:9100/metrics`
+
+---
+
+
+
+### 🚀 Setup Grafana (Local Machine)
+
+**Step 1 — Install Grafana**
+
+```bash
+sudo apt-get install -y grafana
+sudo systemctl start grafana-server
+sudo systemctl enable grafana-server
+```
+
+**Step 2 — Access Grafana**
+
+```
+http://localhost:3000
+```
+
+Default credentials: `admin / admin` (change on first login)
+
+**Step 3 — Add Prometheus as Datasource**
+
+1. Go to **Connections → Data Sources**
+2. Click **Add data source**
+3. Select **Prometheus**
+4. Set URL to `http://localhost:9090`
+5. Click **Save & Test**
+
+**Step 4 — Import Pre-built Dashboard**
+
+1. Go to **Dashboards → Import**
+2. Enter dashboard ID: `1860`
+3. Select your Prometheus datasource
+4. Click **Import**
+
+**Step 5 — Build Custom Dashboard**
+
+1. Go to **Dashboards → New Dashboard**
+2. Click **Add visualization**
+3. Select Prometheus as the datasource
+4. Enter PromQL queries from the table above for each panel
+
+---
 
 > This runs the cash-tracker application locally using Minikube and Helm.
 
@@ -467,10 +856,11 @@ This will stop and remove all pods and resources created by the Helm chart.
 
 ## 🔮 Future Improvements
 
-- [ ] Add **Prometheus + Grafana** for real-time monitoring and dashboards
 - [ ] Migrate from Docker Compose to full **Kubernetes on EKS**
 - [ ] Add **HTTPS / SSL** using Let's Encrypt or AWS ACM
 - [ ] Set up **log management** with ELK Stack or Loki
+- [ ] Add **Alertmanager** for Prometheus alerting (email / Slack notifications)
+- [ ] Get **AWS Solutions Architect Associate (SAA-C03)** certification
 
 ---
 
