@@ -6,8 +6,8 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - MONGODB_URI=mongodb+srv://surenarpit133_db_user:orzDt1gP4QlFs9xc@cash-tracker.tigwqsi.mongodb.net/?appName=cash-tracker
-      - PORT=5000
+      - MONGODB_URI=${MONGODB_URI}
+      - PORT=${PORT}
 
 
   frontend:
