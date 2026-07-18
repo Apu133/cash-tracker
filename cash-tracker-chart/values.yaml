@@ -4,17 +4,17 @@ deployment:
     name: backend
     image:
       repository: apu133/cash-tracker-backend
-      tag: 0.1
+      tag: 0.2
     port: 5000
     env:
-      mongo_uri: mongodb://db-service:27017/cash-tracker
+      mongo_uri: mongodb://db:27017/cash-tracker
       port: "5000"
   
   frontend:
     name: frontend
     image:
       repository: apu133/cash-tracker-frontend
-      tag: 0.3
+      tag: 0.4
     port: 80
   
   db:

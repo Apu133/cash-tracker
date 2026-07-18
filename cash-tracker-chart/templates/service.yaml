@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.service.db.name }}-service
+  name: {{ .Values.service.db.name }}
 spec:
   clusterIP: None
   selector:
@@ -15,7 +15,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.service.backend.name }}-service
+  name: {{ .Values.service.backend.name }}
 spec:
   type: {{ .Values.service.backend.type }}
   selector:
@@ -29,7 +29,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.service.frontend.name }}-service
+  name: {{ .Values.service.frontend.name }}
 spec:
   type: {{ .Values.service.frontend.type }}
   selector:
