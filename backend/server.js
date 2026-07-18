@@ -22,6 +22,7 @@ connection.once('open', () => {
 });
 
 // Routes
+app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/transactions', require('./routes/transactions'));
 
 app.get('/', (req, res) => {

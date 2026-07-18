@@ -95,3 +95,105 @@
   color: #e74c3c;
   font-weight: bold;
 }
+
+/* ===== Auth Forms (Login/Signup) ===== */
+.auth-form {
+  max-width: 400px;
+  margin: 80px auto;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.auth-form h2 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.auth-form form div {
+  margin-bottom: 15px;
+}
+
+.auth-form label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #2c3e50;
+}
+
+.auth-form input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+.auth-form button[type="submit"] {
+  background-color: #3498db;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+  margin-top: 5px;
+}
+
+.auth-form button[type="submit"]:hover {
+  background-color: #2980b9;
+}
+
+.auth-form p {
+  text-align: center;
+  margin-top: 15px;
+  color: #2c3e50;
+}
+
+.auth-form p a {
+  color: #3498db;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.auth-form p a:hover {
+  text-decoration: underline;
+}
+
+.auth-form .error {
+  background-color: #fdecea;
+  color: #e74c3c;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+/* ===== User bar / Logout (inside Dashboard header) ===== */
+.user-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 10px;
+  color: #2c3e50;
+  font-weight: bold;
+}
+
+.btn-logout {
+  background-color: #e74c3c;
+  color: white;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-logout:hover {
+  background-color: #c0392b;
+}

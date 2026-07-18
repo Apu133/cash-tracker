@@ -1,2 +1,7 @@
 terraform.tfstate
 terraform.tfstate.backup
+.env
+.terraform
+.terraform.lock.hcl
+package-lock.json
+
